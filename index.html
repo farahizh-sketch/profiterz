@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,7 +92,7 @@
     display: inline-flex; align-items: center; gap: 8px;
     background: rgba(255,107,0,0.15); border: 1px solid rgba(255,107,0,0.5);
     color: #FF6B00; font-size: 11px; letter-spacing: 4px;
-    padding: 6px 18px; text-transform: uppercase; margin-bottom: 20px;
+    padding: 6px 18px; text-trans: uppercase; margin-bottom: 20px;
     animation: fadeUp 0.6s ease both;
   }
   .offer-main-title {
@@ -270,55 +269,18 @@
   .contact-item p { font-size: 15px; color: var(--text); }
   .contact-item small { font-size: 12px; color: var(--muted); }
 
-  /* ENQUIRY FORM */
-  .enquiry-box {
-    background: var(--bg2);
-    border: 1px solid rgba(255,184,0,0.3);
-    padding: 36px;
+  /* GOOGLE FORM WRAPPER */
+  .gform-wrapper {
     position: relative;
-    overflow: hidden;
+    width: 100%;
+    background: #fff; /* Google Form baseline matches its internal light background */
+    border: 1px solid rgba(255,184,0,0.25);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   }
-  .enquiry-box::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--orange), var(--gold), var(--orange));
-    background-size: 200% 100%;
-    animation: bannerShift 3s ease-in-out infinite;
+  .gform-wrapper iframe {
+    display: block;
+    width: 100%;
   }
-  .enquiry-box h3 { font-family: 'Bebas Neue'; font-size: 28px; letter-spacing: 3px; color: var(--gold); margin-bottom: 4px; }
-  .form-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 10px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; font-weight: 700; }
-  .form-group input, .form-group select, .form-group textarea {
-    width: 100%; background: var(--bg); border: 1px solid var(--border);
-    color: var(--text); font-family: 'Rajdhani',sans-serif; font-size: 15px;
-    padding: 11px 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none; -webkit-appearance: none;
-  }
-  .form-group input::placeholder, .form-group textarea::placeholder { color: var(--muted); }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: rgba(255,184,0,0.6); box-shadow: 0 0 0 3px rgba(255,184,0,0.07); }
-  .form-group select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23FFB800' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer;
-  }
-  .form-group select option { background: #0C1420; color: var(--text); }
-  .form-group textarea { resize: vertical; min-height: 76px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .form-submit-btn {
-    width: 100%; background: linear-gradient(135deg,#FF6B00,#FFB800);
-    color: #000; border: none; padding: 15px;
-    font-family: 'Rajdhani',sans-serif; font-weight: 700; font-size: 16px;
-    letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
-    clip-path: polygon(12px 0%,100% 0%,calc(100% - 12px) 100%,0% 100%);
-    transition: all 0.2s; margin-top: 6px;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .form-submit-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,107,0,0.3); }
-  .form-submit-btn svg { width: 17px; height: 17px; fill: #000; }
-  .form-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.7; }
-  .form-success { display: none; text-align: center; padding: 40px 20px; }
-  .form-success .success-icon { font-size: 48px; margin-bottom: 16px; }
-  .form-success h4 { font-family: 'Bebas Neue'; font-size: 28px; color: var(--green); letter-spacing: 2px; margin-bottom: 8px; }
-  .form-success p { font-size: 15px; color: var(--muted); line-height: 1.6; }
 
   /* CTA STRIP */
   .cta-strip { background: var(--gold); padding: 50px 5%; text-align: center; }
@@ -380,7 +342,6 @@
     .offer-right { min-height: 280px; }
     .offer-modules { grid-template-columns: 1fr; }
     .offer-module:last-child { grid-column: 1; }
-    .form-row { grid-template-columns: 1fr; }
     body { padding-bottom: 58px; }
     .float-btns { display: flex; }
   }
@@ -843,7 +804,7 @@
         <div style="font-size:12px;color:var(--muted);">Only <strong style="color:#FF3A3A;">3 seats remaining</strong> at this price. Fill the form to enroll →</div>
       </div>
 
-      <a href="https://www.google.com/maps/place/Profiterz+Share+Market+Classes" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;display:block;">
+      <a href="https://www.google.com/maps/place/Profiterz+Share+Market+Classes+%7C+Stock+Market+Training+Institute+Mira+Road/@19.2838432,72.8658718,17z/data=!3m1!4b1!4m6!3m5!1s0x3be7b1c4ac8a8435:0x987f758672d4d025!8m2!3d19.2838432!4d72.8658718!16s%2Fg%2F11z2h2jxmp?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;display:block;">
         <div style="background:var(--bg2);border:1px solid var(--border);padding:14px;font-size:13px;color:var(--muted);">
           📌 <strong style="color:var(--gold);">Find us on Google Maps</strong><br>
           <span style="font-size:12px;">Search <em>"Profiterz Share Market Classes Mira Road"</em></span>
@@ -851,87 +812,24 @@
       </a>
     </div>
 
-    <!-- IMPROVED ENQUIRY FORM -->
+    <!-- LIVE GOOGLE FORM EMBED -->
     <div>
-      <div class="enquiry-box">
-        <h3>ENQUIRE NOW</h3>
-        <p class="form-subtitle">
-          Fill in your details and our team will call you within 2 hours.
-          <strong style="color:var(--text);">Free demo every Saturday!</strong>
+      <div style="background:var(--bg2);border:1px solid var(--border);padding:32px;">
+        <h3 style="font-family:'Bebas Neue';font-size:24px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;">ENQUIRE NOW</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+          For <strong style="color:var(--text);">share market classes in Mira Road</strong> — fill the form below or call us directly.
         </p>
-
-        <div id="enquiry-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="f-name">Full Name *</label>
-              <input type="text" id="f-name" placeholder="Your full name" autocomplete="name">
-            </div>
-            <div class="form-group">
-              <label for="f-phone">Phone / WhatsApp *</label>
-              <input type="tel" id="f-phone" placeholder="+91 9XXXXXXXXX" autocomplete="tel">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="f-email">Email Address</label>
-            <input type="email" id="f-email" placeholder="you@email.com" autocomplete="email">
-          </div>
-          <div class="form-group">
-            <label for="f-course">Course Interested In *</label>
-            <select id="f-course">
-              <option value="" disabled selected>Select a course…</option>
-              <option value="professional-trader">🔥 Professional Trader Course (₹4,999 Offer)</option>
-              <option value="fundamentals">Stock Market Fundamentals (Beginner)</option>
-              <option value="technical-analysis">Technical Analysis Mastery</option>
-              <option value="fno">F&amp;O — Futures &amp; Options (Advanced)</option>
-              <option value="intraday">Intraday &amp; Swing Trading</option>
-              <option value="algo">Algorithmic Trading (Python)</option>
-              <option value="commodity">Commodity &amp; Currency</option>
-              <option value="demo">Free Demo Class (Saturday)</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="f-batch">Preferred Batch</label>
-              <select id="f-batch">
-                <option value="" disabled selected>Select timing…</option>
-                <option>Morning — 9:00 AM to 11:00 AM</option>
-                <option>Evening — 6:00 PM to 8:00 PM</option>
-                <option>Weekend Batch</option>
-                <option>Any Available</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="f-experience">Your Experience</label>
-              <select id="f-experience">
-                <option value="" disabled selected>Select level…</option>
-                <option>Complete Beginner</option>
-                <option>Some Knowledge</option>
-                <option>Intermediate Trader</option>
-                <option>Advanced / Professional</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="f-message">Message (Optional)</label>
-            <textarea id="f-message" placeholder="Any specific questions or requirements…" rows="3"></textarea>
-          </div>
-          <button type="button" class="form-submit-btn" onclick="submitEnquiry()">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            SEND ENQUIRY — GET CALLBACK
-          </button>
-          <p class="form-note">
-            📞 Or call: <a href="tel:+919833443103" style="color:var(--gold);font-weight:700;">+91 9833443103</a>
-            &nbsp;·&nbsp;
-            💬 <a href="https://wa.me/919833443103?text=Hi%2C+I+want+to+enquire+about+courses+at+Profiterz" target="_blank" style="color:#25D366;font-weight:700;">WhatsApp Us</a><br>
-            No spam · We only contact you about your enquiry
-          </p>
-        </div>
-
-        <div class="form-success" id="form-success">
-          <div class="success-icon">✅</div>
-          <h4>ENQUIRY RECEIVED!</h4>
-          <p>Our team will call you within 2 hours.<br>
-          You can also reach us on <a href="https://wa.me/919833443103" style="color:var(--gold);">WhatsApp +91 9833443103</a></p>
+        <div class="gform-wrapper">
+          <iframe   
+            src="https://docs.google.com/forms/d/e/1FAIpQLSet_7AzmuK1l7DwCYJ8qULL3cMGZARoXFd9mYiejnU1E3jc2A/viewform?embedded=true"
+            width="100%"
+            height="800"
+            frameborder="0"
+            marginheight="0"
+            marginwidth="0"
+            title="Profiterz Enquiry Form">
+            Loading form…
+          </iframe>
         </div>
       </div>
     </div>
@@ -1021,33 +919,6 @@
       if (!isOpen) { item.classList.add('open'); item.querySelector('.faq-a').style.display = 'block'; }
     });
   });
-
-  // Form submission
-  function submitEnquiry() {
-    const name = document.getElementById('f-name').value.trim();
-    const phone = document.getElementById('f-phone').value.trim();
-    const course = document.getElementById('f-course').value;
-    if (!name) { highlightField('f-name', 'Please enter your full name.'); return; }
-    if (!phone || phone.length < 8) { highlightField('f-phone', 'Please enter a valid phone number.'); return; }
-    if (!course) { highlightField('f-course', 'Please select a course.'); return; }
-    document.getElementById('enquiry-form').style.display = 'none';
-    document.getElementById('form-success').style.display = 'block';
-    // Log for debugging — replace with actual form submission endpoint in production
-    console.log('Enquiry submitted:', { name, phone, course,
-      email: document.getElementById('f-email').value,
-      batch: document.getElementById('f-batch').value,
-      experience: document.getElementById('f-experience').value,
-      message: document.getElementById('f-message').value
-    });
-  }
-
-  function highlightField(id, msg) {
-    const el = document.getElementById(id);
-    el.style.borderColor = 'var(--red)';
-    el.focus();
-    setTimeout(() => el.style.borderColor = '', 3000);
-    alert(msg);
-  }
 </script>
 </body>
 </html>
