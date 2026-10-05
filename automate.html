@@ -30,10 +30,10 @@
   <!-- logged out -->
   <section id="auth">
     <h1>Log in to receive alerts</h1>
-    <p>Create an account or log in, then add the webhook that should receive each alert.</p>
+    <p>Log in with the details your admin gave you, then add the webhook that should receive each alert.</p>
     <input id="email" type="email" placeholder="Email" autocomplete="email">
     <input id="pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
-    <button id="login">Log in</button><button id="signup" class="ghost">Create account</button>
+    <button id="login">Log in</button>
   </section>
 
   <!-- logged in -->
@@ -50,8 +50,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 // Safe to expose: the anon key is protected by the row-level security policy.
-const SUPABASE_URL = "https://vnylhxcyiaxnxrlqyxbs.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_TBATnzrAKw3M9Bgf4ZrdcQ_732yL_7D";
+const SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR-ANON-KEY";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const $ = (id) => document.getElementById(id);
@@ -80,11 +80,6 @@ async function refresh() {
 $("login").onclick = async () => {
   const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("pass").value });
   error ? say(error.message) : (say(""), refresh());
-};
-$("signup").onclick = async () => {
-  const { data, error } = await sb.auth.signUp({ email: $("email").value, password: $("pass").value });
-  if (error) return say(error.message);
-  data.session ? refresh() : say("Check your email to confirm your account, then log in.", true);
 };
 $("logout").onclick = async () => { await sb.auth.signOut(); refresh(); };
 $("add").onclick = async () => {
