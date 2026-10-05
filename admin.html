@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin: create users</title>
+<style>
+  :root { --bg:#f3f5f7; --ink:#14202b; --muted:#5d6b78; --line:#cfd8e0; --accent:#0a7d5a; --err:#b3261e; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#10171d; --ink:#e6edf3; --muted:#8b9aa8; --line:#2a3743; --accent:#3ecf9b; --err:#ff8a80; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 Georgia,serif; }
+  main { max-width:560px; margin:0 auto; padding:10vh 20px; }
+  h1 { font-size:2rem; margin:0 0 12px; } p { color:var(--muted); margin:0 0 24px; }
+  input,button { font:inherit; padding:12px 14px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--ink); }
+  input { width:100%; margin-bottom:12px; }
+  button { background:var(--accent); color:#fff; border-color:var(--accent); cursor:pointer; margin-right:8px; }
+  button.ghost { background:transparent; color:var(--ink); border-color:var(--line); }
+  #msg { margin-top:14px; } .ok{color:var(--accent)} .err{color:var(--err)} .hide{display:none}
+</style>
+</head>
+<body>
+<main>
+  <section id="auth">
+    <h1>Admin log in</h1>
+    <input id="email" type="email" placeholder="Admin email">
+    <input id="pass" type="password" placeholder="Password">
+    <button id="login">Log in</button>
+  </section>
+  <section id="app" class="hide">
+    <h1>Create a user</h1>
+    <p>The user can log in right away at /automate.html. No email is sent.</p>
+    <input id="nemail" type="email" placeholder="User email">
+    <input id="npass" type="text" placeholder="Password (8+ characters)">
+    <button id="create">Create user</button><button id="logout" class="ghost">Log out</button>
+  </section>
+  <div id="msg" role="status"></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const sb = supabase.createClient("https://YOUR-PROJECT.supabase.co", "YOUR-ANON-KEY");
+const $ = (id) => document.getElementById(id);
+const say = (t, ok) => { $("msg").textContent = t || ""; $("msg").className = ok ? "ok" : "err"; };
+async function refresh() {
+  const { data: { session } } = await sb.auth.getSession();
+  $("auth").classList.toggle("hide", !!session); $("app").classList.toggle("hide", !session);
+}
+$("login").onclick = async () => {
+  const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("pass").value });
+  error ? say(error.message) : (say(""), refresh());
+};
+$("logout").onclick = async () => { await sb.auth.signOut(); refresh(); };
+$("create").onclick = async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  const r = await fetch("/api/create-user", { method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token },
+    body: JSON.stringify({ email: $("nemail").value.trim(), password: $("npass").value }) });
+  const d = await r.json();
+  if (d.ok) { say("User created: " + $("nemail").value, true); $("nemail").value = $("npass").value = ""; }
+  else say(d.error);
+};
+refresh();
+</script>
+</body>
+</html>
