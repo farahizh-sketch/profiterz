@@ -56,12 +56,18 @@ $("login").onclick = async () => {
 };
 $("logout").onclick = async () => { await sb.auth.signOut(); show(null); };
 $("create").onclick = async () => {
-  const r = await fetch("/api/create-user", { method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + current.access_token },
-    body: JSON.stringify({ email: $("nemail").value.trim(), password: $("npass").value }) });
-  const d = await r.json();
-  if (d.ok) { say("User created: " + $("nemail").value, true); $("nemail").value = $("npass").value = ""; }
-  else say(d.error);
+  say("Creating user...", true);
+  try {
+    if (!current) { await refresh(); if (!current) return say("Please log in again."); }
+    const r = await fetch("/api/create-user", { method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + current.access_token },
+      body: JSON.stringify({ email: $("nemail").value.trim(), password: $("npass").value }) });
+    const text = await r.text();
+    let d; try { d = JSON.parse(text); } catch { d = null; }
+    if (d && d.ok) { say("User created: " + $("nemail").value, true); $("nemail").value = $("npass").value = ""; }
+    else if (d) say(d.error || "Failed (" + r.status + ")");
+    else say("Server returned " + r.status + ". The /api/create-user function was not found or crashed. Check Vercel > Logs.");
+  } catch (e) { say("Error: " + e.message); }
 };
 refresh();
 </script>
