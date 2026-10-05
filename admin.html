@@ -40,19 +40,24 @@
 const sb = supabase.createClient("https://vnylhxcyiaxnxrlqyxbs.supabase.co", "sb_publishable_TBATnzrAKw3M9Bgf4ZrdcQ_732yL_7D");
 const $ = (id) => document.getElementById(id);
 const say = (t, ok) => { $("msg").textContent = t || ""; $("msg").className = ok ? "ok" : "err"; };
-async function refresh() {
-  const { data: { session } } = await sb.auth.getSession();
+let current = null;
+function show(session) {
+  current = session;
   $("auth").classList.toggle("hide", !!session); $("app").classList.toggle("hide", !session);
 }
+async function refresh() { const { data } = await sb.auth.getSession(); show(data.session); }
 $("login").onclick = async () => {
-  const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("pass").value });
-  error ? say(error.message) : (say(""), refresh());
+  say("Logging in...", true);
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email: $("email").value.trim(), password: $("pass").value });
+    if (error) return say(error.message);
+    say(""); show(data.session);
+  } catch (e) { say("Error: " + e.message); }
 };
-$("logout").onclick = async () => { await sb.auth.signOut(); refresh(); };
+$("logout").onclick = async () => { await sb.auth.signOut(); show(null); };
 $("create").onclick = async () => {
-  const { data: { session } } = await sb.auth.getSession();
   const r = await fetch("/api/create-user", { method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + current.access_token },
     body: JSON.stringify({ email: $("nemail").value.trim(), password: $("npass").value }) });
   const d = await r.json();
   if (d.ok) { say("User created: " + $("nemail").value, true); $("nemail").value = $("npass").value = ""; }
