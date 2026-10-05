@@ -78,8 +78,12 @@ async function refresh() {
 }
 
 $("login").onclick = async () => {
-  const { error } = await sb.auth.signInWithPassword({ email: $("email").value, password: $("pass").value });
-  error ? say(error.message) : (say(""), refresh());
+  say("Logging in...", true);
+  try {
+    const { error } = await sb.auth.signInWithPassword({ email: $("email").value.trim(), password: $("pass").value });
+    if (error) return say(error.message);
+    say(""); refresh();
+  } catch (e) { say("Error: " + e.message); }
 };
 $("logout").onclick = async () => { await sb.auth.signOut(); refresh(); };
 $("add").onclick = async () => {
