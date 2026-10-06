@@ -1,12 +1,14 @@
-// Vercel serverless function: POST /api/tv?secret=...
-// Receives the TradingView alert and forwards it to every active user webhook.
-// npm i @supabase/supabase-js @vercel/functions
+// POST /api/tv?secret=...&strategy=gold&action=buy_exit
+// strategy: gold | nifty10 | nifty12     action: buy | buy_exit | sell | sell_exit
+// (strategy/action may also come as fields in a JSON alert body)
+// Forwards the alert only to users who saved a webhook for that strategy + action.
 const { createClient } = require("@supabase/supabase-js");
 const { waitUntil } = require("@vercel/functions");
 const dns = require("dns").promises;
 const net = require("net");
 
-// service-role key bypasses RLS so we can read ALL users' webhooks. Server only!
+const STRATEGIES = ["gold", "nifty10", "nifty12"];
+const ACTIONS = ["buy", "buy_exit", "sell", "sell_exit"];
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 const isPrivate = (ip) =>
@@ -20,8 +22,9 @@ async function isSafe(u) {
   return !isPrivate(ip);
 }
 
-async function fanOut(body, isJson) {
-  const { data, error } = await db.from("webhooks").select("url").eq("active", true).limit(5000);
+async function fanOut(strategy, action, body, isJson) {
+  const { data, error } = await db.from("webhooks").select("url")
+    .eq("strategy", strategy).eq("action", action).eq("active", true).limit(5000);
   if (error) return console.error("db error", error.message);
 
   const results = await Promise.allSettled(data.map(async ({ url }) => {
@@ -37,7 +40,7 @@ async function fanOut(body, isJson) {
   }));
 
   const ok = results.filter((r) => r.status === "fulfilled").length;
-  console.log(`Alert delivered to ${ok}/${data.length}`);
+  console.log(`${strategy}/${action}: delivered to ${ok}/${data.length}`);
   results.filter((r) => r.status === "rejected").forEach((r) => console.log("  failed:", r.reason.message));
 }
 
@@ -47,7 +50,13 @@ module.exports = (req, res) => {
 
   const isJson = typeof req.body !== "string";
   const body = isJson ? JSON.stringify(req.body) : req.body;
+  const b = isJson && req.body ? req.body : {};
+  const strategy = String(req.query.strategy || b.strategy || "").toLowerCase();
+  const action = String(req.query.action || b.action || "").toLowerCase().replace(/[\s-]+/g, "_");
 
-  waitUntil(fanOut(body, isJson)); // keeps running after we reply
-  res.status(200).json({ ok: true }); // TradingView only waits ~3s
+  if (!STRATEGIES.includes(strategy) || !ACTIONS.includes(action))
+    return res.status(400).json({ error: "Unknown strategy or action", strategy, action });
+
+  waitUntil(fanOut(strategy, action, body, isJson));
+  res.status(200).json({ ok: true });
 };
