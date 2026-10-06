@@ -3,77 +3,99 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Automate: send alerts to my webhook</title>
+<title>Automate: send alerts to my webhooks</title>
 <style>
   :root { --bg:#f3f5f7; --ink:#14202b; --muted:#5d6b78; --line:#cfd8e0; --accent:#0a7d5a; --err:#b3261e; }
   @media (prefers-color-scheme: dark) { :root { --bg:#10171d; --ink:#e6edf3; --muted:#8b9aa8; --line:#2a3743; --accent:#3ecf9b; --err:#ff8a80; } }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 Georgia,"Times New Roman",serif; }
-  main { max-width:560px; margin:0 auto; padding:10vh 20px 40px; }
+  main { max-width:640px; margin:0 auto; padding:8vh 20px 40px; }
   h1 { font-size:2rem; line-height:1.2; margin:0 0 12px; }
   p { color:var(--muted); margin:0 0 24px; }
-  input, button { font:inherit; padding:12px 14px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--ink); }
-  input { width:100%; margin-bottom:12px; }
+  input, button { font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--ink); }
+  input { width:100%; }
   input:focus, button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
   button { background:var(--accent); color:#fff; border-color:var(--accent); cursor:pointer; margin-right:8px; }
   button.ghost { background:transparent; color:var(--ink); border-color:var(--line); }
-  ul { list-style:none; padding:0; margin:28px 0 0; }
-  li { display:flex; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--line); }
-  li span { flex:1; overflow-wrap:anywhere; }
-  li button { margin:0; padding:6px 10px; }
-  #msg { margin-top:14px; min-height:1.5em; } .ok{color:var(--accent)} .err{color:var(--err)}
-  .hide { display:none; }
+  #auth input { margin-bottom:12px; }
+  fieldset { border:1px solid var(--line); border-radius:8px; margin:0 0 22px; padding:8px 16px 16px; }
+  legend { font-weight:bold; padding:0 8px; font-size:1.15rem; }
+  .row { display:grid; grid-template-columns:90px 1fr auto; gap:10px; align-items:center; margin-top:10px; }
+  .row button { margin:0; }
+  .row .lbl { color:var(--muted); }
+  .saved { border-color:var(--accent); }
+  @media (max-width:480px) { .row { grid-template-columns:1fr auto; } .row .lbl { grid-column:1 / -1; margin-bottom:-6px; } }
+  #msg { margin-top:14px; min-height:1.5em; } .ok{color:var(--accent)} .err{color:var(--err)} .hide{display:none}
 </style>
 </head>
 <body>
 <main>
-  <!-- logged out -->
   <section id="auth">
     <h1>Log in to receive alerts</h1>
-    <p>Log in with the details your admin gave you, then add the webhook that should receive each alert.</p>
+    <p>Log in with the details your admin gave you.</p>
     <input id="email" type="email" placeholder="Email" autocomplete="email">
-    <input id="pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
+    <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
     <button id="login">Log in</button>
   </section>
 
-  <!-- logged in -->
   <section id="app" class="hide">
     <h1>Your webhooks</h1>
     <p id="who"></p>
-    <input id="url" type="url" placeholder="https://example.com/my-webhook" aria-label="Webhook URL">
-    <button id="add">Add webhook</button><button id="logout" class="ghost">Log out</button>
-    <ul id="list"></ul>
+    <div id="strats"></div>
+    <button id="logout" class="ghost">Log out</button>
   </section>
   <div id="msg" role="status"></div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-// Safe to expose: the anon key is protected by the row-level security policy.
 const SUPABASE_URL = "https://vnylhxcyiaxnxrlqyxbs.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_TBATnzrAKw3M9Bgf4ZrdcQ_732yL_7D";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const STRATS = [["gold", "GOLD MCX"], ["nifty10", "10AM Nifty"], ["nifty12", "12PM Nifty"]];
+const ACTS = [["buy", "Buy"], ["buy_exit", "Buy exit"], ["sell", "Sell"], ["sell_exit", "Sell exit"]];
+
 const $ = (id) => document.getElementById(id);
 const say = (t, ok) => { $("msg").textContent = t || ""; $("msg").className = ok ? "ok" : "err"; };
+
+async function save(strategy, action, input) {
+  const url = input.value.trim();
+  if (!url) {
+    const { error } = await sb.from("webhooks").delete().eq("strategy", strategy).eq("action", action);
+    if (error) return say(error.message);
+    input.classList.remove("saved"); return say("Webhook removed.", true);
+  }
+  if (!url.startsWith("https://")) return say("Webhook must start with https://");
+  const { error } = await sb.from("webhooks").upsert({ strategy, action, url }, { onConflict: "user_id,strategy,action" });
+  if (error) return say(error.message);
+  input.classList.add("saved"); say("Saved.", true);
+}
 
 async function refresh() {
   const { data: { session } } = await sb.auth.getSession();
   $("auth").classList.toggle("hide", !!session);
   $("app").classList.toggle("hide", !session);
   if (!session) return;
-  $("who").textContent = "Signed in as " + session.user.email;
-  const { data, error } = await sb.from("webhooks").select("*").order("created_at");
+  $("who").textContent = "Signed in as " + session.user.email + ". Leave a box empty and press Save to remove it.";
+  const { data, error } = await sb.from("webhooks").select("strategy,action,url");
   if (error) return say(error.message);
-  const ul = $("list"); ul.innerHTML = "";
-  data.forEach((w) => {
-    const li = document.createElement("li");
-    const s = document.createElement("span"); s.textContent = w.url + (w.active ? "" : " (paused)");
-    const t = document.createElement("button"); t.className = "ghost"; t.textContent = w.active ? "Pause" : "Resume";
-    t.onclick = async () => { await sb.from("webhooks").update({ active: !w.active }).eq("id", w.id); refresh(); };
-    const d = document.createElement("button"); d.className = "ghost"; d.textContent = "Delete";
-    d.onclick = async () => { await sb.from("webhooks").delete().eq("id", w.id); refresh(); };
-    li.append(s, t, d); ul.append(li);
+  const have = {}; data.forEach((w) => (have[w.strategy + "|" + w.action] = w.url));
+
+  const box = $("strats"); box.innerHTML = "";
+  STRATS.forEach(([sid, sname]) => {
+    const fs = document.createElement("fieldset");
+    const lg = document.createElement("legend"); lg.textContent = sname; fs.append(lg);
+    ACTS.forEach(([aid, aname]) => {
+      const row = document.createElement("div"); row.className = "row";
+      const l = document.createElement("span"); l.className = "lbl"; l.textContent = aname;
+      const i = document.createElement("input"); i.type = "url"; i.placeholder = "https://example.com/webhook";
+      i.setAttribute("aria-label", sname + " " + aname + " webhook");
+      i.value = have[sid + "|" + aid] || ""; if (i.value) i.classList.add("saved");
+      const b = document.createElement("button"); b.textContent = "Save"; b.onclick = () => save(sid, aid, i);
+      row.append(l, i, b); fs.append(row);
+    });
+    box.append(fs);
   });
 }
 
@@ -86,14 +108,6 @@ $("login").onclick = async () => {
   } catch (e) { say("Error: " + e.message); }
 };
 $("logout").onclick = async () => { await sb.auth.signOut(); refresh(); };
-$("add").onclick = async () => {
-  const url = $("url").value.trim();
-  if (!url.startsWith("https://")) return say("Webhook must start with https://");
-  const { error } = await sb.from("webhooks").insert({ url });
-  if (error) return say(error.code === "23505" ? "That webhook is already added." : error.message);
-  $("url").value = ""; say("Webhook added. You will receive new alerts.", true); refresh();
-};
-// defer the call: awaiting Supabase inside this callback would freeze login
 sb.auth.onAuthStateChange(() => setTimeout(refresh, 0));
 refresh();
 </script>
