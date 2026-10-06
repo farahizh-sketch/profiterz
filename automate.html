@@ -93,7 +93,8 @@ $("add").onclick = async () => {
   if (error) return say(error.code === "23505" ? "That webhook is already added." : error.message);
   $("url").value = ""; say("Webhook added. You will receive new alerts.", true); refresh();
 };
-sb.auth.onAuthStateChange(refresh);
+// defer the call: awaiting Supabase inside this callback would freeze login
+sb.auth.onAuthStateChange(() => setTimeout(refresh, 0));
 refresh();
 </script>
 </body>
