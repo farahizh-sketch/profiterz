@@ -31,13 +31,19 @@
     <p>The user can log in right away at /automate.html. No email is sent.</p>
     <input id="nemail" type="email" placeholder="User email">
     <input id="npass" type="text" placeholder="Password (8+ characters)">
-    <button id="create">Create user</button><button id="logout" class="ghost">Log out</button>
+    <button id="create">Create user</button>
+    <h1 style="margin-top:44px;font-size:1.4rem">Reset a user's password</h1>
+    <p>Passwords cannot be viewed. Set a new one and send it to the user.</p>
+    <input id="remail" type="email" placeholder="User email">
+    <input id="rpass" type="text" placeholder="New password (8+ characters)">
+    <button id="reset">Set new password</button>
+    <button id="logout" class="ghost" style="margin-top:28px">Log out</button>
   </section>
   <div id="msg" role="status"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-const sb = supabase.createClient("https://vnylhxcyiaxnxrlqyxbs.supabase.co", "sb_publishable_TBATnzrAKw3M9Bgf4ZrdcQ_732yL_7D");
+const sb = supabase.createClient("https://YOUR-PROJECT.supabase.co", "YOUR-ANON-KEY");
 const $ = (id) => document.getElementById(id);
 const say = (t, ok) => { $("msg").textContent = t || ""; $("msg").className = ok ? "ok" : "err"; };
 let current = null;
@@ -67,6 +73,18 @@ $("create").onclick = async () => {
     if (d && d.ok) { say("User created: " + $("nemail").value, true); $("nemail").value = $("npass").value = ""; }
     else if (d) say(d.error || "Failed (" + r.status + ")");
     else say("Server returned " + r.status + ". The /api/create-user function was not found or crashed. Check Vercel > Logs.");
+  } catch (e) { say("Error: " + e.message); }
+};
+$("reset").onclick = async () => {
+  say("Updating password...", true);
+  try {
+    if (!current) { await refresh(); if (!current) return say("Please log in again."); }
+    const r = await fetch("/api/reset-password", { method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + current.access_token },
+      body: JSON.stringify({ email: $("remail").value.trim(), password: $("rpass").value }) });
+    const text = await r.text(); let d; try { d = JSON.parse(text); } catch { d = null; }
+    if (d && d.ok) { say("Password updated for " + $("remail").value, true); $("remail").value = $("rpass").value = ""; }
+    else say(d ? d.error : "Server returned " + r.status + ". Check Vercel > Logs.");
   } catch (e) { say("Error: " + e.message); }
 };
 refresh();
